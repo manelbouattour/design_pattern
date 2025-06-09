@@ -5,19 +5,22 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class RectangleFactory implements ShapeFactory {
+    private Color strokeColor = Color.BLACK;
+
+    public void setStrokeColor(Color color) {
+        this.strokeColor = color;
+    }
+
     @Override
     public Shape create(double startX, double startY, double endX, double endY) {
-        // Calcul de la largeur et hauteur
         double width = Math.abs(endX - startX);
         double height = Math.abs(endY - startY);
         
-        // Calcul du point de départ (coin supérieur gauche)
-        double x = Math.min(startX, endX);
-        double y = Math.min(startY, endY);
-        
-        Rectangle rectangle = new Rectangle(x, y, width, height);
+        Rectangle rectangle = new Rectangle(Math.min(startX, endX), Math.min(startY, endY), width, height);
         rectangle.setFill(Color.TRANSPARENT);
-        rectangle.setStroke(Color.BLACK);
+        rectangle.setStroke(strokeColor);
+        rectangle.setStrokeWidth(1.5);
+        
         return rectangle;
     }
 }
