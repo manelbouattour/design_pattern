@@ -24,3 +24,6 @@ public class RectangleFactory implements ShapeFactory {
         return rectangle;
     }
 }
+//design pattern : kol haja lchnou 
+//chnoma logger kifeh 
+//

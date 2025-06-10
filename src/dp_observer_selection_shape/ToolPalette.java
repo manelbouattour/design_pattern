@@ -12,37 +12,57 @@ import javafx.scene.shape.*;
 
 public class ToolPalette extends HBox {
     private final ShapeSelectionSubject selectionSubject;
-    
+
     public ToolPalette(ShapeSelectionSubject selectionSubject) {
         this.selectionSubject = selectionSubject;
         initializeUI();
-        applyModernStyle();
+        applyLightStyle();
     }
-    
+
     private void initializeUI() {
         ToggleGroup group = new ToggleGroup();
-        
-        ToggleButton btnRectangle = createToolButton("Rectangle", ShapeType.RECTANGLE, group, 
-            new Rectangle(18, 12, Color.TRANSPARENT) {{
-                setStroke(Color.WHITE);
-                setStrokeWidth(2);
-            }});
-        
+
+        // Rectangle button
+        ToggleButton btnRectangle = createToolButton("Rectangle", ShapeType.RECTANGLE, group,
+                new Rectangle(18, 12) {{
+                    setStroke(Color.BLACK);
+                    setFill(Color.TRANSPARENT);
+                    setStrokeWidth(2);
+                }});
+
+        // Circle button
         ToggleButton btnCircle = createToolButton("Cercle", ShapeType.CIRCLE, group,
-            new Circle(9, Color.TRANSPARENT) {{
-                setStroke(Color.WHITE);
-                setStrokeWidth(2);
-            }});
-        
+                new Circle(9) {{
+                    setStroke(Color.BLACK);
+                    setFill(Color.TRANSPARENT);
+                    setStrokeWidth(2);
+                }});
+
+        // Line button
         ToggleButton btnLine = createToolButton("Ligne", ShapeType.LINE, group,
-            new Line(0, 0, 18, 0) {{
-                setStroke(Color.WHITE);
-                setStrokeWidth(2);
-            }});
-        
+                new Line(0, 0, 18, 0) {{
+                    setStroke(Color.BLACK);
+                    setStrokeWidth(2);
+                }});
+
+        // Add buttons to the toolbar
         this.getChildren().addAll(btnRectangle, btnCircle, btnLine);
+
+        // Default selection
+        btnRectangle.setSelected(true);
+        selectionSubject.notifyObservers(ShapeType.RECTANGLE);
+
+        // Update observers on selection change
+        group.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) {
+                selectionSubject.notifyObservers(null);
+            } else {
+                ShapeType selectedType = (ShapeType) newVal.getUserData();
+                selectionSubject.notifyObservers(selectedType);
+            }
+        });
     }
-    
+
     private ToggleButton createToolButton(String text, ShapeType type, ToggleGroup group, Shape icon) {
         ToggleButton button = new ToggleButton(text, icon);
         button.setToggleGroup(group);
@@ -50,32 +70,30 @@ public class ToolPalette extends HBox {
         button.setAlignment(Pos.CENTER_LEFT);
         button.setContentDisplay(ContentDisplay.LEFT);
         button.setPadding(new Insets(8, 15, 8, 10));
-        
-        button.setOnAction(e -> {
-            selectionSubject.notifyObservers(type);
-            applyButtonSelectionStyle(button, true);
+        button.setStyle("-fx-background-color: transparent; -fx-text-fill: black;");
+        button.setOnMouseEntered(e -> button.setStyle("-fx-background-color: #e0e0e0; -fx-text-fill: black;"));
+        button.setOnMouseExited(e -> {
+            if (button.isSelected()) {
+                button.setStyle("-fx-background-color: #c5cae9; -fx-text-fill: black;");
+            } else {
+                button.setStyle("-fx-background-color: transparent; -fx-text-fill: black;");
+            }
         });
-        
-        // Style pour le premier bouton sélectionné par défaut
-        if (type == ShapeType.RECTANGLE) {
-            button.setSelected(true);
-            applyButtonSelectionStyle(button, true);
-        }
-        
+
+        button.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
+            if (isNowSelected) {
+                button.setStyle("-fx-background-color: #c5cae9; -fx-text-fill: black;");
+            } else {
+                button.setStyle("-fx-background-color: transparent; -fx-text-fill: black;");
+            }
+        });
+
         return button;
     }
-    
-    private void applyModernStyle() {
-        this.setSpacing(5);
+
+    private void applyLightStyle() {
+        this.setSpacing(10);
         this.setPadding(new Insets(10));
-        this.setStyle("-fx-background-color: #3f51b5; -fx-background-radius: 5;");
-    }
-    
-    private void applyButtonSelectionStyle(ToggleButton button, boolean selected) {
-        if (selected) {
-            button.setStyle("-fx-background-color: #5c6bc0; -fx-text-fill: white; -fx-font-weight: bold;");
-        } else {
-            button.setStyle("-fx-background-color: transparent; -fx-text-fill: #e8eaf6;");
-        }
+        this.setStyle("-fx-background-color: white; -fx-border-color: #ccc; -fx-border-radius: 5;");
     }
 }

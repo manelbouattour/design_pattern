@@ -31,7 +31,7 @@ public class DrawingModel {
         try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
             String sql = "INSERT INTO shapes (type, x1, y1, x2, y2, color) VALUES (?, ?, ?, ?, ?, ?)";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                String color = "black"; // Couleur par défaut
+                String color = "black"; 
                 
                 if (shape instanceof javafx.scene.shape.Rectangle r) {
                     ps.setString(1, "RECTANGLE");

@@ -1,18 +1,23 @@
 package main;
+import javafx.scene.control.Button;
 
 import dp_command_draw.*;
 import dp_enumerations.ShapeType;
 import dp_factory_shape.*;
 import dp_observer_selection_shape.*;
 import dp_repository.DrawingModel;
+import dp_singleton_log.LoggerManager;
 import dp_strategy_draw.*;
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
@@ -26,7 +31,7 @@ public class MainApp extends Application {
 
     private Canvas canvas;
     private GraphicsContext gc;
-    
+   
     // Factories avec gestion de couleur
     private CircleFactory circleFactory = new CircleFactory();
     private RectangleFactory rectangleFactory = new RectangleFactory();
@@ -35,27 +40,35 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        // Initialisation du canvas
+
         canvas = new Canvas(800, 600);
         gc = canvas.getGraphicsContext2D();
-        
-        // Initialisation des factories avec la couleur par défaut
-        updateFactoriesColor(currentColor);
-        
-        // Stratégie par défaut
-        currentStrategy = new FactoryBasedStrategy(circleFactory);
+       
 
-        // Configuration de l'interface
+        updateFactoriesColor(currentColor);
+       
+     
+        currentStrategy = new FactoryBasedStrategy(rectangleFactory);
+
         ToolPalette palette = new ToolPalette(selectionSubject);
-        
-        // Sélecteur de couleur
+       
         ColorPicker colorPicker = new ColorPicker(currentColor);
         colorPicker.setOnAction(e -> {
             currentColor = colorPicker.getValue();
             updateFactoriesColor(currentColor);
         });
+       
 
-        // Observateur pour le changement de forme
+        Button clearButton = new Button("Effacer");
+        clearButton.setOnAction(e -> clearDrawing());
+
+        HBox buttonBox = new HBox(10, clearButton);
+        buttonBox.setPadding(new Insets(10));
+        buttonBox.setAlignment(Pos.CENTER_LEFT);
+       
+        VBox topBox = new VBox(10, palette, colorPicker, buttonBox);
+        topBox.setPadding(new Insets(10));
+       
         ShapeObserver shapeObserver = selected -> {
             switch (selected) {
                 case CIRCLE:
@@ -71,7 +84,6 @@ public class MainApp extends Application {
         };
         selectionSubject.addObserver(shapeObserver);
 
-        // Gestion des événements souris
         canvas.setOnMousePressed(e -> {
             startX = e.getX();
             startY = e.getY();
@@ -88,7 +100,7 @@ public class MainApp extends Application {
         });
 
         BorderPane root = new BorderPane();
-        root.setTop(new VBox(palette, colorPicker));
+        root.setTop(topBox); 
         root.setCenter(canvas);
 
         stage.setScene(new Scene(root));
@@ -97,7 +109,16 @@ public class MainApp extends Application {
 
         clearCanvas();
     }
+    private void saveDrawing() {
+        LoggerManager.INSTANCE.log("Dessin enregistré à " + java.time.LocalDateTime.now());
+    }
 
+    private void clearDrawing() {
+        model.getShapes().clear();
+        clearCanvas();
+        LoggerManager.INSTANCE.log("Dessin effacé");
+
+    }
     private void updateFactoriesColor(Color color) {
         circleFactory.setStrokeColor(color);
         rectangleFactory.setStrokeColor(color);
@@ -146,4 +167,5 @@ public class MainApp extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+   
 }
